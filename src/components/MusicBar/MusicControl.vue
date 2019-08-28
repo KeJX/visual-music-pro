@@ -3,8 +3,8 @@
         <div class="top">
             <i class="hide-btn iconfont icon-xiala2" @click="hideEvent"></i>
             <div class="song-info">
-                <span class="song-name">{{songName}}</span>
-                <span class="singer-name">{{singerName}}</span>
+                <span class="song-name">{{musicInfo.songName}}</span>
+                <span class="singer-name">{{musicInfo.singerName}}</span>
             </div>
         </div>
         <div class="middle">
@@ -37,14 +37,20 @@ export default {
         }
     },
     props:{
-        songName:{
-            type:String,
-            default:"歌曲名称"
-        },
-        singerName:{
-            type:String,
-            default:"歌手姓名"
-        }
+       musicInfo:{
+           type:Object,
+           default:{
+               songName:"songName",
+               singerName:"singerName"
+           }
+       },
+       currentState:{
+           type:Object,
+           default:{
+               currentTime:0,
+               totalTime:0
+           }
+       }
     },
     methods:{
         hideEvent(){

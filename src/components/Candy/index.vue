@@ -1,158 +1,271 @@
 <template>
-  <div ref="webgl"></div>
+  <div class="candy">
+    <div ref="webgl"></div>
+    <color-picker class="color-picker" @ColorPickerTrigger = "changeColor"></color-picker>
+  </div>
 </template>
 <script>
 var THREE = require("three");
 import "@/assets/js/TweenMax.min.js";
 import { mapState } from "vuex";
 var analyser = require("web-audio-analyser");
+
+import ColorPicker from "./ColorPicker";
 export default {
   name: "Candy",
+  components: {
+    ColorPicker
+  },
   computed: mapState(["isStart", "audio", "startBtn"]),
   created() {
     this.init();
   },
   mounted() {
-    this.$refs.webgl.appendChild(this.renderer.domElement);
+    this.$refs.webgl.appendChild(this.three.renderer.domElement);
     requestAnimationFrame(this.render);
   },
   data() {
     return {
-        myAnalyser:null
+      myAnalyser: null,
+      three: {},
+      colors:{
+        innerColor:0x00b49a,
+        topColor:0x7c0065,
+        bottomColor:0x0000ff,
+        bgcColor:0x000000
+      },
+      calEle:{
+        x:1,
+        y:1,
+        z:1
+      },
+      innerArray:[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+      audioEnhanced: {
+        getAvg: analyser => {
+          var binCount = new Uint8Array(analyser.analyser.frequencyBinCount);
+          analyser.frequencies(binCount);
+          var sum = 0;
+          binCount.forEach(function(item, i) {
+            sum += item;
+          });
+          return sum / binCount.length;
+        },
+        getAvgFromTo: (analyser, fromNum, toNum) => {
+          var binCount = new Uint8Array(analyser.analyser.frequencyBinCount);
+          analyser.frequencies(binCount);
+          var length = toNum - fromNum;
+          var sum = 0;
+          for (var i = 0; i < length; i++) {
+            sum += binCount[i];
+          }
+          return sum / length;
+        },
+        datatransY: (analyser, height) => {
+          //颜色加深算法
+          var c = 0;
+          var b = this.audioPreperd.getfinaldataZ(analyser);
+          var a = (this.audioPreperd.getfinaldataY(analyser) * 6) / height;
+          c = (a + (a * b) / (1 - b)) / 2;
+          return c / 1.5;
+        },
+
+        datatransX: (analyser, width) => {
+          //颜色加深算法
+          var c = 0;
+          var b = this.audioPreperd.getfinaldataZ(analyser);
+          var a = (this.audioPreperd.getfinaldataX(analyser) * 6) / width;
+          c = (a + (a * b) / (1 - b)) / 2;
+          return c / 1.5;
+        }
+      },
+      audioPreperd: {
+        getfinaldataY: analyser => {
+          var final = 0;
+          var low =this.audioEnhanced.getAvgFromTo(analyser, 10, 30);
+          var mid =this.audioEnhanced.getAvgFromTo(analyser, 118, 138);
+          var hei =this.audioEnhanced.getAvgFromTo(analyser, 220, 240);
+          final = 0.5 * low + 0.2 * mid + 0.3 * hei;
+          return final;
+        },
+
+        getfinaldataX: analyser => {
+          var final = 0;
+          var low = this.audioEnhanced.getAvgFromTo(analyser, 10, 30);
+          var mid = this.audioEnhanced.getAvgFromTo(analyser, 118, 138);
+          var hei = this.audioEnhanced.getAvgFromTo(analyser, 220, 240);
+          final = 0.2 * low + 0.5 * mid + 0.3 * hei;
+          return final;
+        },
+        getfinaldataZ: analyser => {
+          var final = 0;
+          var mid = this.audioEnhanced.getAvgFromTo(analyser, 10, 40);
+          final = mid / 300;
+          return final;
+        }
+      }
     };
   },
   methods: {
     init() {
-       this.width = window.innerWidth
-        this.height = window.innerHeight
-      this.point = new THREE.Vector2(0.8, 0.5);
+      var self = this.three;
+      self.width = window.innerWidth;
+      self.height = window.innerHeight;
+      self.point = new THREE.Vector2(0.8, 0.5);
 
-      this.scene = new THREE.Scene();
-      this.clock = new THREE.Clock();
-      this.camera = new THREE.PerspectiveCamera(
+      self.scene = new THREE.Scene();
+      self.clock = new THREE.Clock();
+      self.camera = new THREE.PerspectiveCamera(
         100,
-        this.width / this.height,
+        self.width / self.height,
         0.1,
         10000
       );
-      this.camera.position.set(0, 0, 300);
+      self.camera.position.set(0, 0, 300);
 
-      this.hemisphereLight = new THREE.HemisphereLight(0xe5fd1f, 0x000000, 0.6);
+      self.hemisphereLight = new THREE.HemisphereLight(this.colors.topColor, this.colors.bottomColor, 0.6);
 
-      this.scene.add(this.hemisphereLight);
+      self.scene.add(self.hemisphereLight);
 
-      this.light = new THREE.DirectionalLight(0xffff00, 0.2);
+      self.light = new THREE.DirectionalLight(this.colors.innerColor, 0.2);
 
-      this.light.position.set(200, 300, 400);
+      self.light.position.set(200, 300, 400);
 
-      this.scene.add(this.light);
+      self.scene.add(this.light);
 
-      var light2 = this.light.clone();
+      var light2 = self.light.clone();
       light2.position.set(200, 300, 400);
-      this.scene.add(light2);
+      self.scene.add(light2);
 
-      this.geometry = new THREE.IcosahedronGeometry(150, 5); //后面的是模型精度5
-      for (var i = 0; i < this.geometry.vertices.length; i++) {
-        var vector = this.geometry.vertices[i];
-        vector._o = vector.clone();
+      self.geometry = new THREE.IcosahedronGeometry(150, 5); //后面的是模型精度5
+      for (var i = 0; i < self.geometry.vertices.length; i++) {
+        var vector = self.geometry.vertices[i];
+        vector.o = vector.clone();
       }
       var material = new THREE.MeshPhongMaterial({
         emissive: 0xf6c7f1,
         emissiveIntensity: 0.4,
         shininess: 0
       });
-      var shape = new THREE.Mesh(this.geometry, material);
-      this.shape = shape;
-      this.scene.add(shape);
+      var shape = new THREE.Mesh(self.geometry, material);
+      self.shape = shape;
+      self.scene.add(shape);
 
-      this.renderer = new THREE.WebGLRenderer();
+      self.renderer = new THREE.WebGLRenderer();
 
-      this.renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1);
-      this.renderer.setSize(this.width,this.height);
+      self.renderer.setPixelRatio(window.devicePixelRatio > 1 ? 2 : 1);
+      self.renderer.setSize(self.width, self.height);
       // 背景色
-      this.renderer.setClearColor(0xf6c7f1);
+      self.renderer.setClearColor(this.colors.bgcColor);
 
       // show visualization and hide loader
     },
 
     updateVertices(time) {
-      for (var i = 0; i < this.geometry.vertices.length; i++) {
-        var vector = this.geometry.vertices[i];
-        vector.copy(vector._o);
+      var self = this.three;
+      for (var i = 0; i < self.geometry.vertices.length; i++) {
+        var vector = self.geometry.vertices[i];
+        vector.copy(vector.o);
         var perlin = window.noise.simplex3(
           vector.x * 0.006 + time * 0.0002,
           vector.y * 0.006 + time * 0.0003,
           vector.z * 0.006
         );
-        var ratio = perlin * 0.4 * (this.point.y + 0.1) + 0.8;
+        var ratio = perlin * 0.4 * (self.point.y + 0.1) + 0.8;
         vector.multiplyScalar(ratio);
       }
-      this.geometry.verticesNeedUpdate = true;
+      self.geometry.verticesNeedUpdate = true;
     },
     render(time) {
-      this.updateVertices(time);
-      this.renderer.render(this.scene, this.camera);
+      var three = this.three
+      this.updateVertices(time)
+      three.renderer.setClearColor(this.colors.bgcColor,1.0)
+      if(this.isStart){
+     var avg =[0,0,0]
+     var innerArray = this.innerArray
+     for(var i =0;i<innerArray.length;i++){
+       innerArray[i].shift()
+       if(i===0){
+         innerArray[i].push(this.audioPreperd.getfinaldataX(this.myAnalyser))
+       }
+       if(i===1){
+        innerArray[i].push(this.audioPreperd.getfinaldataY(this.myAnalyser))
+       }
+       if(i===2){
+        innerArray[i].push(this.audioPreperd.getfinaldataZ(this.myAnalyser)*300)
+       }
+     }
+      // innerArray.shift()
+      // innerArray.push(getfinaldataX(myAnalyser))
+      innerArray.forEach((item,i)=>{
+        item.forEach((num,j)=>{
+          avg[i]+=num
+        })
+      })
+      // innerArray.forEach(item=>{
+      //   avg+=item
+      // })
+      // avg=avg/10
+      avg[0] = avg[0]/innerArray[0].length
+      avg[1] = avg[1]/innerArray[1].length
+      avg[2] = avg[2]/innerArray[2].length
+      var innerColor=this.colors.innerColor+this.calEle.x*0x010000*parseInt(avg[0])
+      var topColor=this.colors.topColor+this.calEle.y*0x000100*parseInt(avg[1])
+      var botColor=this.colors.bottomColor+this.calEle.z*0x000001*parseInt(avg[2])
+   
+      three.light.color.set(innerColor)
+      three.hemisphereLight.color.set(topColor)
+      three.hemisphereLight.groundColor.set(botColor)
+   }
+   else{
+      var innerColor=this.colors.innerColor
+      var topColor=this.colors.topColor
+      var botColor=this.colors.bottomColor
+   
+      three.light.color.set(innerColor)
+      three.hemisphereLight.color.set(topColor)
+      three.hemisphereLight.groundColor.set(botColor)
+   }
+      three.renderer.render(three.scene, three.camera)
       requestAnimationFrame(this.render);
     },
     renderWithMusic() {
-      var array = new Uint8Array(this.myAnalyser.analyser.frequencyBinCount)
-    this.myAnalyser.frequencies(array)
-      TweenMax.to(this.point, 0.8, {
-        y: (this.getAvg(this.myAnalyser) * 10 / this.height),
-        //y: (getnewdata(myAnalyser) * 1 / height),
-        //y: (getAvgFromTo(myAnalyser,10,30) * 10 / height),
-        //y: (getfinaldataY(myAnalyser)* 6 / height),
-        // y: this.datatransY(this.myAnalyser),
-        // x: this.datatransX(this.myAnalyser),
-        //x: (200 * 10 / height),
-        x: (this.getAvg(this.myAnalyser) *10 / this.width),
+      var self = this
+      var array = new Uint8Array(this.myAnalyser.analyser.frequencyBinCount);
+      this.myAnalyser.frequencies(array);
+      TweenMax.to(this.three.point, 0.8, {
+        // y: (this.audioEnhanced.getAvg(this.myAnalyser) * 10) / this.three.height,
+        // x: (this.audioEnhanced.getAvg(this.myAnalyser) * 10) / this.three.width,
+        x: self.audioEnhanced.datatransX(this.myAnalyser,self.three.width),
+        y: self.audioEnhanced.datatransY(this.myAnalyser,self.three.height),
         ease: Power4.easeOut
       });
       requestAnimationFrame(this.renderWithMusic);
     },
-
-    getAvg(analyser){
-         var binCount = new Uint8Array(analyser.analyser.frequencyBinCount)
-    analyser.frequencies(binCount)
-    var sum = 0
-    binCount.forEach(function(item,i) {
-    
-		sum += item;
-    });
-    // for(var i =0;i<10;i++){
-    //   binCount(10)
-    // }
-	return (sum / binCount.length)
-    },
-datatransY(analyser){
-//颜色加深算法
-var c = 0
-var b = getfinaldataZ(analyser)
-var a = getfinaldataY(analyser)* 6 / height
-c = (a +(a*b)/(1-b))/2
-return c/1.5
-},
-
-datatransX(analyser){
-  //颜色加深算法
-  var c = 0
-  var b = getfinaldataZ(analyser)
-  var a = getfinaldataX(analyser)* 6 / height
-  c = (a +(a*b)/(1-b))/2
-  return c/1.5
+  changeColor(config){
+    this.colors ={...this.colors,...config.colors}
+    this.calEle = config.calEle
+    console.log(this.colors)
+    console.log(this.calEle)
   }
   },
 
-  watch:{
-      isStart(newVal){
-          console.log(newVal)
-          if(newVal){
-               this.myAnalyser = analyser(this.audio)
-                requestAnimationFrame(this.renderWithMusic)
-          }
+  watch: {
+    isStart(newVal) {
+      if (newVal) {
+        this.myAnalyser = analyser(this.audio);
+        requestAnimationFrame(this.renderWithMusic);
       }
+    }
   }
 };
 </script>
 <style lang="scss" scoped>
+.candy {
+  position: relative;
+  .color-picker {
+    position: absolute;
+    right: 30px;
+    top: 30px;
+  }
+}
 </style>

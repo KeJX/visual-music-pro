@@ -2,7 +2,7 @@
   <div class="audiobar">
     <audio
       ref="audio"
-      :src="`${publicPath}music/test.mp3`"
+      :src="`${publicPath}music/${MusicList[currentIndex].link}`"
       @timeupdate="_updateTime"
       @canplay="_readyToPlay"
     ></audio>
@@ -13,42 +13,45 @@
         <div class="left-occupy"></div>
         <kjx-progress class="progress" :percent="percentage" @changePercent="changePercent" />
       </div>
-      <img :src="`${publicPath}test/music.jpg`" class="music-img" @click="_toggleControl"/>
+      <img :src="`${publicPath}music/${MusicList[currentIndex].img}`" class="music-img" @click="_toggleControl"/>
       <div class="music-info" @click="_toggleControl">
-        <span class="music-name">{{ "白色羽毛"}}</span>
-        <span class="singer-name">{{ "芮恩"}}</span>
+        <span class="music-name">{{ MusicList[currentIndex].songName}}</span>
+        <span class="singer-name">{{ MusicList[currentIndex].singerName}}</span>
       </div>
+      <i class="prev-btn iconfont icon-kuaitui" @click="_changeSong(_getIndex(currentIndex,-1))" ></i>
       <i class="control-btn" ref="controlBtn" :class="controlBtnClass" @click="tooggleAudioState"></i>
+      <i class="next-btn iconfont icon-kuaijin" @click="_changeSong(_getIndex(currentIndex,1))"></i>
       <i class="iconfont icon-liebiao list-btn" @click="_toggleMusicList"></i>
     </div>
    </div>
 
 
      <transition name="list">
-       <play-list v-show="isListShow" :isListShow="isListShow" :list="list" @toggleMusicList= "_toggleMusicList"></play-list>
+       <play-list 
+       :currentIndex="currentIndex" 
+       v-show="isListShow" 
+       :isListShow="isListShow" 
+       :list="MusicList" 
+       @toggleMusicList= "_toggleMusicList"
+       @itemClick = playListItemClick></play-list>
     </transition>
-
-    <transition name="control">
-      <normal-control class="normal-container" v-show="isControlShow" @hideEvent="_toggleControl" />
-    </transition>
-   
-   
   </div>
 </template>
 <script>
 import kjxProgress from "@/base/Progress";
-import NormalControl from "./MusicControl"
 import PlayList from "./PlayList"
+
+import {MusicList} from "./config"
 export default {
   components: {
     kjxProgress,
-    NormalControl,
     PlayList
   },
   created(){},
   mounted() {
     // 获取audio
     this.audio = this.$refs.audio
+    console.log(this.audio);
     // 放入vuex中
     this.$store.state.audio = this.audio
     this.$store.state.startBtn = this.$refs.controlBtn
@@ -61,24 +64,14 @@ export default {
       // audio
       publicPath: process.env.BASE_URL,
       audio: null,
-      isPlay: false,
+      isPlay:false,
       currentTime: 0,
       totalTime: 0,
 
       // LIST
       isListShow: false,
-      list: [
-        "daoxiang",
-        "daoxiang",
-        "daoxiang",
-        "daoxiang",
-        "daoxiang",
-        "daoxiang",
-        "daoxiang",
-        "daoxiang",
-        "daoxiang",
-        "daoxiang"
-      ],
+      MusicList: MusicList,
+      currentIndex:0,
 
       // normal control
       isControlShow:false,
@@ -88,7 +81,7 @@ export default {
     controlBtnClass() {
       return {
         iconfont: true,
-        "icon-zanting": !this.isPlay,
+        "icon-zanting":!this.isPlay,
         "icon-bofang": this.isPlay
       };
     },
@@ -97,7 +90,16 @@ export default {
       return 0;
     }
   },
-  watch: {},
+  watch: {
+    percentage(newVal){
+      if(newVal>=1){
+        this._changeSong(this._getIndex(this.currentIndex,1))
+      }
+    },
+    currentIndex(newVal){
+      this._changeSong(newVal)
+    }
+  },
   methods: {
     tooggleAudioState() {
       // 更新isStart
@@ -105,14 +107,25 @@ export default {
         this.$store.commit("triggerStart")
       }
       if (this.isPlay) {
-        this.audio.pause();
+        this._audioPause()
       } else {
-        this.audio.play();
+        this._audioPlay()
       }
-      this.isPlay = !this.isPlay;
     },
     changePercent(percent) {
       this.audio.currentTime = this.totalTime * percent;
+    },
+    playListItemClick(i){
+      this.currentIndex = i
+      console.log(i);
+    },
+    _audioPlay(){
+      this.audio.play()
+      this.isPlay=true
+    },
+    _audioPause(){
+    this.audio.pause()
+      this.isPlay=false
     },
     _updateTime(e) {
       let target = e.target;
@@ -126,8 +139,30 @@ export default {
       this.isListShow = !this.isListShow;
     },
     _toggleControl(){
-     
       this.isControlShow = !this.isControlShow
+    },
+    _getIndex(num,mode){
+      if(mode==1){
+        num++
+      }
+      if(mode==-1){
+        num--
+      }
+      if(num>this.MusicList.length-1){
+         return num=0
+      }
+      if(num<0){
+        return num =this.MusicList.length-1
+      }
+      return num
+    },
+    _changeSong(index){
+      console.log(index)
+      this.currentIndex = index
+      this.audio.src = this.MusicList[index].link
+      setTimeout(() => {
+         this._audioPlay()
+      }, 100)
     }
   }
 };
@@ -231,7 +266,9 @@ export default {
     }
 
     .control-btn,
-    .list-btn {
+    .list-btn,
+    .prev-btn,
+    .next-btn {
       display: inline-block;
       flex: 0 0 40px;
       height: 40px;
@@ -240,9 +277,7 @@ export default {
       font-size: 30px;
       margin-right: 10px;
     }
-    .control-btn {
-      // margin-right: -120px;
-    }
+   
     .list-btn {
       font-size: 25px;
     }

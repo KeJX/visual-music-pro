@@ -3,9 +3,9 @@
         <div class="layer" @click="_toggleMusicList"></div>
         <transition name="playlist">
             <div class="music-list" v-show="isListShow">
-            <kjx-cell class="play-order van-hairline--bottom" :value="'顺序播放(20)'">
-          <i class="iconfont icon-xunhuan" slot="left-icon"></i>
-          <i class="iconfont icon-shanchu1" slot="right-icon"></i>
+            <kjx-cell class="play-order van-hairline--bottom" :value="''">
+          <!-- <i class="iconfont icon-xunhuan" slot="left-icon"></i>
+          <i class="iconfont icon-shanchu1" slot="right-icon"></i> -->
         </kjx-cell>
         <kjx-scroll id="list-scroll" ref="list">
           <div class="content">
@@ -13,9 +13,10 @@
               class="list-item van-hairline--bottom"
               v-for="(item,i) in list"
               :key="i"
-              :value="item"
+              :value="item.songName"
+              @click="itemClick(i)"
             >
-              <i class="iconfont icon-shengyin left-icon" slot="left-icon"></i>
+              <i v-show="i===currentIndex" class="iconfont icon-shengyin left-icon" slot="left-icon"></i>
               <i class="iconfont icon-shanchu" slot="right-icon"></i>
             </kjx-cell>
           </div>
@@ -40,6 +41,10 @@ export default {
         isListShow:{
             default:false,
             type:Boolean
+        },
+        currentIndex:{
+          default:0,
+          type:Number
         }
     },
     components:{
@@ -47,10 +52,13 @@ export default {
         kjxCell,
     },
     methods: {
-        _toggleMusicList(){
-            if(this.isListShow)
-            this.$emit("toggleMusicList")
-        }
+      itemClick(i){
+        this.$emit("itemClick",i)
+      },
+      _toggleMusicList(){
+          if(this.isListShow)
+          this.$emit("toggleMusicList")
+      }
     },
     watch:{
         list(){

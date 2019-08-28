@@ -6,7 +6,7 @@ import "@/assets/scss/index.scss"
 import "@/assets/js/perlin.js"
 import "@/assets/js/TweenMax.min.js"
 import store from './store'
-
+import 'vant/lib/button/style'
 Vue.config.productionTip = false
 
 new Vue({
