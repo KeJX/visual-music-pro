@@ -4,6 +4,7 @@
     <color-picker class="color-picker" @ColorPickerTrigger = "changeColor"></color-picker>
     <spectrogram class="spectrogram" :analyser="myAnalyser"/>
     <sharp-slider class="sharp-slider" :percent="sharpPercent" @changePercent = "changeSharpNum"></sharp-slider>
+    <mode-picker class="mode-picker" ></mode-picker>
   </div>
 </template>
 <script>
@@ -15,12 +16,14 @@ var analyser = require("web-audio-analyser");
 import ColorPicker from "./ColorPicker";
 import Spectrogram from "./Spectrogram"
 import SharpSlider from "./SharpSlider"
+import ModePicker from "./ModePicker"
 export default {
   name: "Candy",
   components: {
     ColorPicker,
     Spectrogram,
-    SharpSlider
+    SharpSlider,
+    ModePicker
   },
   computed:{
      sharpPercent(){
@@ -286,7 +289,7 @@ $base-index:100;
     position: absolute;
     right: $right;
     top: $height;
-    z-index:$base-index + 10;
+    z-index:$base-index + 20;
   }
 
   .spectrogram{
@@ -300,6 +303,14 @@ $base-index:100;
   .sharp-slider{
     position:absolute;
     top:$height * 2 + $gap;
+    right:$right;
+    // right:$right;
+    z-index:$base-index +10;
+  }
+
+  .mode-picker{
+     position:absolute;
+    top:$height * 3 + $gap * 2;
     right:$right;
     // right:$right;
     z-index:$base-index;

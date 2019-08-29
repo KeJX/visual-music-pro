@@ -43,6 +43,8 @@ export default {
     }
     .sharp-slider-layer{
         position:absolute;
+    box-shadow: 0 0 10px #8e8e8e;
+
         width:200px;
         background-color: #fff;
         height:50px;

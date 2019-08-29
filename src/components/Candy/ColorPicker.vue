@@ -3,7 +3,7 @@
     <dropdown>
       <button slot="dropdown-trigger" class="main-btn">{{btnName}}</button>
       <div  slot="dropdown-layer"  class="colorPanel">
-        <div class="panel-item" v-for="(item,i) in ColorConfigs" :key="i" @click="colorChoose(i)">
+        <div class="panel-item" :class="{'item-active':activeIndex== i }"  v-for="(item,i) in ColorConfigs" :key="i" @click="colorChoose(i)">
           <img :src="`${publicPath}colorImg/${item.img}`"  class="panel-item-img" />
           <span class="panel-item-text">{{item.name}}</span>
         </div>
@@ -32,7 +32,8 @@ export default {
       publicPath: process.env.BASE_URL,
       btnName: "颜色",
       isColorPickerShow: false,
-      ColorConfigs
+      ColorConfigs,
+      activeIndex:0
     };
   },
   props: {
@@ -42,6 +43,7 @@ export default {
       colorChoose(i){
           // this.btnName = ColorConfigs[i].name
           this.$emit("ColorPickerTrigger",ColorConfigs[i])
+          this.activeIndex = i
       },
       randomColor(){
         function getRandomInt(max) {
@@ -60,6 +62,7 @@ export default {
             z:eleArr[getRandomInt(3)]
         },
         }
+         this.activeIndex = -1
         this.$emit("ColorPickerTrigger",color)
       },
        randomColorByCondition(){
@@ -89,6 +92,7 @@ export default {
             z:eleArr[getRandomInt(3)]
         },
         }
+         this.activeIndex = -1
        
         this.$emit("ColorPickerTrigger",color)
        },
@@ -131,7 +135,12 @@ export default {
       flex-direction: column;
       justify-content: space-around;
       align-items: center;
-      
+      &.item-active{
+         .panel-item-text{
+           background-color: $main-color;
+           color:#fff;
+         }
+      }
         &:hover{
             transition: all .5s;
             transform: scale(1.1);
@@ -147,8 +156,10 @@ export default {
       }
       .panel-item-text {
         display: inline-block;
-        
+        min-width:32px;
+        border-radius:5px;
         margin-top:5px;
+        text-align: center;
       }
     }
   }

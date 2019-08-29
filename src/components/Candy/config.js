@@ -92,3 +92,8 @@ export const ColorConfigs = [
     
     
 ]
+
+export const ModeConfigs = [
+    "渐变模式",
+    "突变模式",
+]
