@@ -89,30 +89,6 @@ export const ColorConfigs = [
         img:"7.png"
 
     },
-    {
-        name:"8",
-        colors:{
-            innerColor:0x00ffff,
-            topColor:0xffff00,
-            bottomColor:0x0000ff
-        },
-        calEle:{
-            x:1,y:0,z:-1
-        },
-        img:"8.png"
-
-    },
-    {
-        name:"9",
-        colors:{
-            innerColor:0x00ffff,
-            topColor:0xffff00,
-            bottomColor:0x0000ff
-        },
-        calEle:{
-            x:1,y:0,z:-1
-        },
-        img:"9.png"
-
-    },
+    
+    
 ]

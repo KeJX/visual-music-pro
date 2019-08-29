@@ -2,6 +2,8 @@
   <div class="candy">
     <div ref="webgl"></div>
     <color-picker class="color-picker" @ColorPickerTrigger = "changeColor"></color-picker>
+    <spectrogram class="spectrogram" :analyser="myAnalyser"/>
+    <sharp-slider class="sharp-slider"></sharp-slider>
   </div>
 </template>
 <script>
@@ -11,10 +13,14 @@ import { mapState } from "vuex";
 var analyser = require("web-audio-analyser");
 
 import ColorPicker from "./ColorPicker";
+import Spectrogram from "./Spectrogram"
+import SharpSlider from "./SharpSlider"
 export default {
   name: "Candy",
   components: {
-    ColorPicker
+    ColorPicker,
+    Spectrogram,
+    SharpSlider
   },
   computed: mapState(["isStart", "audio", "startBtn"]),
   created() {
@@ -40,6 +46,7 @@ export default {
         z:1
       },
       innerArray:[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+      sharpNum:0.006,//0.002-0.08
       audioEnhanced: {
         getAvg: analyser => {
           var binCount = new Uint8Array(analyser.analyser.frequencyBinCount);
@@ -166,9 +173,9 @@ export default {
         var vector = self.geometry.vertices[i];
         vector.copy(vector.o);
         var perlin = window.noise.simplex3(
-          vector.x * 0.006 + time * 0.0002,
-          vector.y * 0.006 + time * 0.0003,
-          vector.z * 0.006
+          vector.x * this.sharpNum + time * 0.0002,
+          vector.y * this.sharpNum + time * 0.0003,
+          vector.z * this.sharpNum
         );
         var ratio = perlin * 0.4 * (self.point.y + 0.1) + 0.8;
         vector.multiplyScalar(ratio);
@@ -244,8 +251,9 @@ export default {
   changeColor(config){
     this.colors ={...this.colors,...config.colors}
     this.calEle = config.calEle
-    console.log(this.colors)
-    console.log(this.calEle)
+  },
+  changeSharpNum(){
+
   }
   },
 
@@ -266,6 +274,22 @@ export default {
     position: absolute;
     right: 30px;
     top: 30px;
+    z-index:100;
+  }
+
+  .spectrogram{
+    position:absolute;
+    left: 0px;
+    top:0;
+    z-index:90;
+    // transform: rotateZ(90deg);
+  }
+
+  .sharp-slider{
+    position:absolute;
+    top:10px;
+    left:10px;
+    z-index:100;
   }
 }
 </style>

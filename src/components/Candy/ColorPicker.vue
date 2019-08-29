@@ -1,22 +1,33 @@
 <template>
   <div class="colorPicker" @mouseenter="mouseEnterEvent" @mouseleave="mouseLeaveEvent">
-    <button class="main-btn">{{btnName}}</button>
-    <transition name="colorPanel">
-      <div v-show="isColorPickerShow" class="colorPanel">
+    <dropdown>
+      <button name="dropdown-trigger" class="main-btn">{{btnName}}</button>
+      <div  name="dropdown-layer" v-show="isColorPickerShow" class="colorPanel">
         <div class="panel-item" v-for="(item,i) in ColorConfigs" :key="i" @click="colorChoose(i)">
-          <img :src="`${publicPath}colorImg/${item.img}`" alt class="panel-item-img" />
+          <img :src="`${publicPath}colorImg/${item.img}`"  class="panel-item-img" />
           <span class="panel-item-text">{{item.name}}</span>
         </div>
+        <div class="panel-item" @click="randomColor">
+          <img :src="`${publicPath}test/music.jpg`" class="panel-item-img" />
+          <span class="panel-item-text">试试手气1</span>
+        </div>
+        <div class="panel-item" @click="randomColorByCondition">
+          <img :src="`${publicPath}test/music.jpg`" class="panel-item-img" />
+          <span class="panel-item-text">试试手气2</span>
+        </div>
       </div>
-    </transition>
+    </dropdown>
+ 
   </div>
 </template>
 <script>
-import Vue from "vue";
-import { Grid, GridItem } from "vant";
 import { ColorConfigs} from "./config"
+import Dropdown from "@/base/Dropdown"
 export default {
   name: "ColorPicker",
+  components:{
+    Dropdown
+  },
   data() {
     return {
       publicPath: process.env.BASE_URL,
@@ -33,6 +44,55 @@ export default {
           this.btnName = ColorConfigs[i].name
           this.$emit("ColorPickerTrigger",ColorConfigs[i])
       },
+      randomColor(){
+        function getRandomInt(max) {
+             return Math.floor(Math.random() * Math.floor(max));
+          }
+          var eleArr=[-1,0,1]
+        let color = {
+           colors:{
+            innerColor:parseInt(getRandomInt(256),16)*256*256+parseInt(getRandomInt(256),16)*256+parseInt(getRandomInt(256),16),//0-20
+            topColor:parseInt(getRandomInt(256),16)*256*256+parseInt(getRandomInt(256),16)*256+parseInt(getRandomInt(256),16),//236-255
+            bottomColor:parseInt(getRandomInt(256),16)*256*256+parseInt(getRandomInt(256),16)*256+parseInt(getRandomInt(256),16)//0 255
+        },
+        calEle:{
+            x:eleArr[getRandomInt(3)],
+            y:eleArr[getRandomInt(3)],
+            z:eleArr[getRandomInt(3)]
+        },
+        }
+        this.$emit("ColorPickerTrigger",color)
+      },
+       randomColorByCondition(){
+         function getRandomInt(max) {
+             return Math.floor(Math.random() * Math.floor(max));
+          }
+          var eleArr=[-1,0,1]
+        let color = {
+           colors:{
+            innerColor:
+            getRandomInt(2) == 0 ? parseInt(getRandomInt(21),16)*256*256 : (235 + parseInt(getRandomInt(20),16))*256*256
+            +parseInt(getRandomInt(129),16)*256
+            +parseInt(getRandomInt(129),16),
+
+            topColor:
+            parseInt(getRandomInt(129),16)*256*256
+            +getRandomInt(2) == 0? parseInt(getRandomInt(256),16)*256 : (235 + parseInt(getRandomInt(20),16))*256
+            +parseInt(getRandomInt(129),16),
+            bottomColor:
+            parseInt(getRandomInt(129),16)*256*256
+            +parseInt(getRandomInt(129),16)*256
+            +getRandomInt(2) == 0? parseInt(getRandomInt(256),16) : (235 + parseInt(getRandomInt(20),16))
+        },
+        calEle:{
+            x:eleArr[getRandomInt(3)],
+            y:eleArr[getRandomInt(3)],
+            z:eleArr[getRandomInt(3)]
+        },
+        }
+       
+        this.$emit("ColorPickerTrigger",color)
+       },
     mouseEnterEvent() {
       this.isColorPickerShow = true;
     },

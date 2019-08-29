@@ -92,14 +92,14 @@ export default {
   .kjxprogress-underbar {
     width: 100%;
     background-color: #c1bfbf;
-    height: 4px;
+    height: 8px;
   }
   .kjxprogress-bar {
     position: absolute;
     top: 0;
     // min-width: 1px;
     background-color: $main-color;
-    height: 4px;
+    height: 8px;
     .kjxprogress-control {
       position: absolute;
       width: 10px;

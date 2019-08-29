@@ -102,10 +102,7 @@ export default {
   },
   methods: {
     tooggleAudioState() {
-      // 更新isStart
-      if(!this.$store.state.isStart){
-        this.$store.commit("triggerStart")
-      }
+     
       if (this.isPlay) {
         this._audioPause()
       } else {
@@ -120,6 +117,10 @@ export default {
       console.log(i);
     },
     _audioPlay(){
+       // 更新isStart
+      if(!this.$store.state.isStart){
+        this.$store.commit("triggerStart")
+      }
       this.audio.play()
       this.isPlay=true
     },
@@ -234,7 +235,7 @@ export default {
       .left-occupy,
       .right-occupy {
         width: 10px;
-        height: 4px;
+        height: 8px;
       }
       .left-occupy {
         background-color: $main-color;

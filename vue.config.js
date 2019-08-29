@@ -4,7 +4,7 @@ function resolve (dir) {
 }
 module.exports = {
     lintOnSave: false,
-
+    baseUrl:'./',
     chainWebpack: (config)=>{
         config.resolve.alias
             .set('@', resolve('src'))
