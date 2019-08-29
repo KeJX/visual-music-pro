@@ -1,8 +1,8 @@
 <template>
-  <div class="colorPicker" @mouseenter="mouseEnterEvent" @mouseleave="mouseLeaveEvent">
+  <div class="colorPicker" >
     <dropdown>
-      <button name="dropdown-trigger" class="main-btn">{{btnName}}</button>
-      <div  name="dropdown-layer" v-show="isColorPickerShow" class="colorPanel">
+      <button slot="dropdown-trigger" class="main-btn">{{btnName}}</button>
+      <div  slot="dropdown-layer"  class="colorPanel">
         <div class="panel-item" v-for="(item,i) in ColorConfigs" :key="i" @click="colorChoose(i)">
           <img :src="`${publicPath}colorImg/${item.img}`"  class="panel-item-img" />
           <span class="panel-item-text">{{item.name}}</span>
@@ -17,7 +17,6 @@
         </div>
       </div>
     </dropdown>
- 
   </div>
 </template>
 <script>
@@ -31,7 +30,7 @@ export default {
   data() {
     return {
       publicPath: process.env.BASE_URL,
-      btnName: "默认颜色",
+      btnName: "颜色",
       isColorPickerShow: false,
       ColorConfigs
     };
@@ -41,7 +40,7 @@ export default {
   },
   methods: {
       colorChoose(i){
-          this.btnName = ColorConfigs[i].name
+          // this.btnName = ColorConfigs[i].name
           this.$emit("ColorPickerTrigger",ColorConfigs[i])
       },
       randomColor(){
@@ -93,29 +92,18 @@ export default {
        
         this.$emit("ColorPickerTrigger",color)
        },
-    mouseEnterEvent() {
-      this.isColorPickerShow = true;
-    },
-    mouseLeaveEvent() {
-      this.isColorPickerShow = false;
-    }
+  
   }
 };
 </script>
 <style lang="scss" scoped>
-.colorPanel-enter-active,
-.colorPanel-leave-active {
-  transition: opacity 0.5s;
-}
 
-.colorPanel-enter,
-.colorPanel-leave-to {
-  opacity: 0;
-}
 @import "~assets/scss/variable";
 .colorPicker {
   position: relative;
   .main-btn {
+    width:100px;
+    height:40px;
     padding: 10px 20px;
     border-radius: 10px;
     background-color: $main-color;

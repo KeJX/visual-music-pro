@@ -3,7 +3,7 @@
     <div ref="webgl"></div>
     <color-picker class="color-picker" @ColorPickerTrigger = "changeColor"></color-picker>
     <spectrogram class="spectrogram" :analyser="myAnalyser"/>
-    <sharp-slider class="sharp-slider"></sharp-slider>
+    <sharp-slider class="sharp-slider" :percent="sharpPercent" @changePercent = "changeSharpNum"></sharp-slider>
   </div>
 </template>
 <script>
@@ -22,7 +22,13 @@ export default {
     Spectrogram,
     SharpSlider
   },
-  computed: mapState(["isStart", "audio", "startBtn"]),
+  computed:{
+     sharpPercent(){
+       return this.sharpNum / this.sharpRange
+    },
+    ...mapState(["isStart", "audio", "startBtn"])
+  } ,
+
   created() {
     this.init();
   },
@@ -46,7 +52,8 @@ export default {
         z:1
       },
       innerArray:[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
-      sharpNum:0.006,//0.002-0.08
+      sharpNum:0.006,//0.00-0.03      
+      sharpRange:0.03,
       audioEnhanced: {
         getAvg: analyser => {
           var binCount = new Uint8Array(analyser.analyser.frequencyBinCount);
@@ -186,7 +193,7 @@ export default {
       var three = this.three
       this.updateVertices(time)
       three.renderer.setClearColor(this.colors.bgcColor,1.0)
-      if(this.isStart){
+    if(this.isStart){
      var avg =[0,0,0]
      var innerArray = this.innerArray
      for(var i =0;i<innerArray.length;i++){
@@ -252,8 +259,9 @@ export default {
     this.colors ={...this.colors,...config.colors}
     this.calEle = config.calEle
   },
-  changeSharpNum(){
-
+  changeSharpNum(percent){
+      this.sharpNum = this.sharpRange * percent 
+      console.log(this.sharpNum)
   }
   },
 
@@ -268,13 +276,17 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+$gap:10px;
+$height:40px;
+$right:30px;
+$base-index:100;
 .candy {
   position: relative;
   .color-picker {
     position: absolute;
-    right: 30px;
-    top: 30px;
-    z-index:100;
+    right: $right;
+    top: $height;
+    z-index:$base-index + 10;
   }
 
   .spectrogram{
@@ -287,9 +299,11 @@ export default {
 
   .sharp-slider{
     position:absolute;
-    top:10px;
-    left:10px;
-    z-index:100;
+    top:$height * 2 + $gap;
+    right:$right;
+    // right:$right;
+    z-index:$base-index;
   }
 }
 </style>
+

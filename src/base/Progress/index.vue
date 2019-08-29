@@ -1,10 +1,16 @@
 <template>
-  <div class="kjxprogress-container" ref="progress" @click="progressClick">
+  <div class="kjxprogress-container" 
+  ref="progress" 
+  @click="progressClick"
+   @mousedown="progressTouchStart"
+           @mousemove="progressTouchMove"
+           @mouseup="progressTouchEnd">
     <div class="kjxprogress-underbar"></div>
     <div class="kjxprogress-bar" @click="progressClick" ref="progressBar"
             @touchstart="progressTouchStart"
            @touchmove="progressTouchMove"
-           @touchend="progressTouchEnd">
+           @touchend="progressTouchEnd"
+           >
       <div class="occupy-left"></div>
       <div class="ovvupy-right"></div>
       <div class="kjxprogress-control" ref="progressControl"></div>
@@ -16,9 +22,11 @@ export default {
   name: "kjxProgress",
 
   mounted() {
-    this.progressWidth = this.$refs.progress.clientWidth;
-    this.btnWidth = this.$refs.progressControl.offsetWidth;
-    this._offset(0)
+    this.progressWidth =parseFloat(this.$refs.progress.currentStyle?this.$refs.progress.currentStyle['width']:document.defaultView.getComputedStyle(this.$refs.progress,false)['width']) 
+    // this.btnWidth = this.$refs.progressControl.offsetWidth;
+    this.btnWidth =parseFloat(this.$refs.progressControl.currentStyle?this.$refs.progressControl.currentStyle['width']:document.defaultView.getComputedStyle(this.$refs.progressControl,false)['width'])
+
+    this._offset(this.progressWidth * this.percent)
   },
 
   props:{
@@ -38,39 +46,37 @@ export default {
 
   methods: {
     progressClick(e) {
-      console.log("click");
       const rect = this.$refs.progress.getBoundingClientRect();
       // 距离最左边的距离
       const offsetWidth = e.pageX - rect.left;
-      console.log(offsetWidth);
       this._offset(offsetWidth)
        this._triggerPercent()
     },
     progressTouchStart(e){
         this.isTouchMove = true
-        this.touch.startX = e.touches[0].clientX
+        this.touch.startX = e.touches||e.clientX
         this.touch.left = this.$refs.progressBar.clientWidth
     },
     progressTouchMove(e){
-        let delta = e.touches[0].clientX - this.touch.startX
+       if(this.isTouchMove){
+          let delta = (e.touches ?e.touches[0].clientX:e.clientX)- this.touch.startX
         let offsetWidth = this.touch.left + delta
         this._offset(offsetWidth)
+       }
     },
      progressTouchEnd() {
          this._triggerPercent()
          this.isTouchMove = false
       },
-    _triggerPercent() {
 
-     let percent = this.$refs.progressBar.clientWidth / this.progressWidth
+    _triggerPercent() {
+     let percent = this.$refs.progressBar.clientWidth / parseFloat(this.progressWidth)
      this.$emit('changePercent',percent)
     },
     _offset(offsetX) {
         offsetX = offsetX>this.progressWidth?(this.progressWidth):offsetX
         offsetX = offsetX<0?0:offsetX
-       
           this.$refs.progressBar.style.width = (offsetX)+ "px"
-        
     }
   },
 
@@ -90,16 +96,21 @@ export default {
 .kjxprogress-container {
   width: 100%;
   .kjxprogress-underbar {
+    position:absolute;
     width: 100%;
     background-color: #c1bfbf;
-    height: 8px;
+    height: 6px;
+    z-index: 99;
+    top:0;
   }
   .kjxprogress-bar {
+    width:100%;
     position: absolute;
     top: 0;
     // min-width: 1px;
     background-color: $main-color;
-    height: 8px;
+    height: 6px;
+    z-index:100;
     .kjxprogress-control {
       position: absolute;
       width: 10px;

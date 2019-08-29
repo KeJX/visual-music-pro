@@ -114,7 +114,6 @@ export default {
     },
     playListItemClick(i){
       this.currentIndex = i
-      console.log(i);
     },
     _audioPlay(){
        // 更新isStart
@@ -235,7 +234,7 @@ export default {
       .left-occupy,
       .right-occupy {
         width: 10px;
-        height: 8px;
+        height: 6px;
       }
       .left-occupy {
         background-color: $main-color;

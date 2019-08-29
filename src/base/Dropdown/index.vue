@@ -3,10 +3,9 @@
         <slot name="dropdown-trigger" >
         </slot>
         <transition name="dropdown">
-        
         <div v-show = "isShow">
             <slot name="dropdown-layer">
-        </slot>
+            </slot>
         </div>
         </transition>
         
@@ -23,12 +22,10 @@ export default {
     methods:{
         onMouseEnter(){
             this.isShow = true
-            console.log(1);
             this.$emit("onMouseEnter")
         },
         onMouseLeave(){
             this.isShow = false
-            console.log(2);
             this.$emit("onMouseLeave")
         }
     }
@@ -44,4 +41,5 @@ export default {
 .dropdown-leave-to{
     opacity:0;
 }
+
 </style>
