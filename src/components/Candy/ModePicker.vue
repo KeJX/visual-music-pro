@@ -25,6 +25,7 @@ export default {
     methods:{
         clickEvent(i){
             this.activeIndex=i
+            this.$emit("modeChangeTrigger",i)
         }
     }
 }

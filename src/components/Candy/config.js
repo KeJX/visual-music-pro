@@ -40,12 +40,12 @@ export const ColorConfigs = [
     {
         name:"4",
         colors:{
-            innerColor:0x00ffff,
-            topColor:0xffff00,
-            bottomColor:0x0000ff
+            innerColor:0xaaaaaa,
+            topColor:0xff40d0,
+            bottomColor:0x1686dc
         },
         calEle:{
-            x:1,y:0,z:-1
+            x:0,y:256,z:1
         },
         img:"4.png"
 
@@ -79,12 +79,12 @@ export const ColorConfigs = [
     {
         name:"7",
         colors:{
-            innerColor:0xffffff,
-            topColor:0xaf0000,
-            bottomColor:0xaf0000
+            innerColor:0x00ff00,
+            topColor:0x003333,
+            bottomColor:0x003333
         },
         calEle:{
-            x:1,y:0,z:-1
+            x:0,y:256,z:256*256
         },
         img:"7.png"
 

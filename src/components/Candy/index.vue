@@ -1,10 +1,10 @@
 <template>
   <div class="candy">
     <div ref="webgl"></div>
-    <color-picker class="color-picker" @ColorPickerTrigger = "changeColor"></color-picker>
-    <spectrogram class="spectrogram" :analyser="myAnalyser"/>
-    <sharp-slider class="sharp-slider" :percent="sharpPercent" @changePercent = "changeSharpNum"></sharp-slider>
-    <mode-picker class="mode-picker" ></mode-picker>
+    <color-picker class="color-picker" @ColorPickerTrigger="changeColor"></color-picker>
+    <spectrogram class="spectrogram" :analyser="myAnalyser" />
+    <sharp-slider class="sharp-slider" :percent="sharpPercent" @changePercent="changeSharpNum"></sharp-slider>
+    <mode-picker class="mode-picker" @modeChangeTrigger="modeChangeTrigger"></mode-picker>
   </div>
 </template>
 <script>
@@ -14,9 +14,9 @@ import { mapState } from "vuex";
 var analyser = require("web-audio-analyser");
 
 import ColorPicker from "./ColorPicker";
-import Spectrogram from "./Spectrogram"
-import SharpSlider from "./SharpSlider"
-import ModePicker from "./ModePicker"
+import Spectrogram from "./Spectrogram";
+import SharpSlider from "./SharpSlider";
+import ModePicker from "./ModePicker";
 export default {
   name: "Candy",
   components: {
@@ -25,12 +25,12 @@ export default {
     SharpSlider,
     ModePicker
   },
-  computed:{
-     sharpPercent(){
-       return this.sharpNum / this.sharpRange
+  computed: {
+    sharpPercent() {
+      return this.sharpNum / this.sharpRange;
     },
     ...mapState(["isStart", "audio", "startBtn"])
-  } ,
+  },
 
   created() {
     this.init();
@@ -43,20 +43,21 @@ export default {
     return {
       myAnalyser: null,
       three: {},
-      colors:{
-        innerColor:0x00b49a,
-        topColor:0x7c0065,
-        bottomColor:0x0000ff,
-        bgcColor:0x000000
+      colors: {
+        innerColor: 0x00b49a,
+        topColor: 0x7c0065,
+        bottomColor: 0x0000ff,
+        bgcColor: 0x000000
       },
-      calEle:{
-        x:1,
-        y:1,
-        z:1
+      calEle: {
+        x: 1,
+        y: 1,
+        z: 1
       },
-      innerArray:[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
-      sharpNum:0.006,//0.00-0.03      
-      sharpRange:0.03,
+      innerArray: [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
+      sharpNum: 0.006, //0.00-0.03
+      sharpRange: 0.03,
+      mode: 0,
       audioEnhanced: {
         getAvg: analyser => {
           var binCount = new Uint8Array(analyser.analyser.frequencyBinCount);
@@ -98,9 +99,9 @@ export default {
       audioPreperd: {
         getfinaldataY: analyser => {
           var final = 0;
-          var low =this.audioEnhanced.getAvgFromTo(analyser, 10, 30);
-          var mid =this.audioEnhanced.getAvgFromTo(analyser, 118, 138);
-          var hei =this.audioEnhanced.getAvgFromTo(analyser, 220, 240);
+          var low = this.audioEnhanced.getAvgFromTo(analyser, 10, 30);
+          var mid = this.audioEnhanced.getAvgFromTo(analyser, 118, 138);
+          var hei = this.audioEnhanced.getAvgFromTo(analyser, 220, 240);
           final = 0.5 * low + 0.2 * mid + 0.3 * hei;
           return final;
         },
@@ -139,7 +140,11 @@ export default {
       );
       self.camera.position.set(0, 0, 300);
 
-      self.hemisphereLight = new THREE.HemisphereLight(this.colors.topColor, this.colors.bottomColor, 0.6);
+      self.hemisphereLight = new THREE.HemisphereLight(
+        this.colors.topColor,
+        this.colors.bottomColor,
+        0.6
+      );
 
       self.scene.add(self.hemisphereLight);
 
@@ -193,79 +198,93 @@ export default {
       self.geometry.verticesNeedUpdate = true;
     },
     render(time) {
-      var three = this.three
-      this.updateVertices(time)
-      three.renderer.setClearColor(this.colors.bgcColor,1.0)
-    if(this.isStart){
-     var avg =[0,0,0]
-     var innerArray = this.innerArray
-     for(var i =0;i<innerArray.length;i++){
-       innerArray[i].shift()
-       if(i===0){
-         innerArray[i].push(this.audioPreperd.getfinaldataX(this.myAnalyser))
-       }
-       if(i===1){
-        innerArray[i].push(this.audioPreperd.getfinaldataY(this.myAnalyser))
-       }
-       if(i===2){
-        innerArray[i].push(this.audioPreperd.getfinaldataZ(this.myAnalyser)*300)
-       }
-     }
-      // innerArray.shift()
-      // innerArray.push(getfinaldataX(myAnalyser))
-      innerArray.forEach((item,i)=>{
-        item.forEach((num,j)=>{
-          avg[i]+=num
-        })
-      })
-      // innerArray.forEach(item=>{
-      //   avg+=item
-      // })
-      // avg=avg/10
-      avg[0] = avg[0]/innerArray[0].length
-      avg[1] = avg[1]/innerArray[1].length
-      avg[2] = avg[2]/innerArray[2].length
-      var innerColor=this.colors.innerColor+this.calEle.x*0x010000*parseInt(avg[0])
-      var topColor=this.colors.topColor+this.calEle.y*0x000100*parseInt(avg[1])
-      var botColor=this.colors.bottomColor+this.calEle.z*0x000001*parseInt(avg[2])
-   
-      three.light.color.set(innerColor)
-      three.hemisphereLight.color.set(topColor)
-      three.hemisphereLight.groundColor.set(botColor)
-   }
-   else{
-      var innerColor=this.colors.innerColor
-      var topColor=this.colors.topColor
-      var botColor=this.colors.bottomColor
-   
-      three.light.color.set(innerColor)
-      three.hemisphereLight.color.set(topColor)
-      three.hemisphereLight.groundColor.set(botColor)
-   }
-      three.renderer.render(three.scene, three.camera)
+      var three = this.three;
+      this.updateVertices(time);
+      three.renderer.setClearColor(this.colors.bgcColor, 1.0);
+      if (this.isStart) {
+        var avg = [0, 0, 0];
+        var innerArray = this.innerArray;
+        for (var i = 0; i < innerArray.length; i++) {
+          innerArray[i].shift();
+          if (i === 0) {
+            innerArray[i].push(
+              this.audioPreperd.getfinaldataX(this.myAnalyser)
+            );
+          }
+          if (i === 1) {
+            innerArray[i].push(
+              this.audioPreperd.getfinaldataY(this.myAnalyser)
+            );
+          }
+          if (i === 2) {
+            innerArray[i].push(
+              this.audioPreperd.getfinaldataZ(this.myAnalyser) * 300
+            );
+          }
+        }
+        
+        innerArray.forEach((item, i) => {
+          item.forEach((num, j) => {
+            avg[i] += num;
+          });
+        });
+        
+        if (this.mode === 0) {
+          avg[0] = avg[0] / innerArray[0].length;
+          avg[1] = avg[1] / innerArray[1].length;
+          avg[2] = avg[2] / innerArray[2].length;
+        }
+        if (this.mode === 1) {
+          avg[0] = this.audioPreperd.getfinaldataX(this.myAnalyser)*3;
+          avg[1] = this.audioPreperd.getfinaldataY(this.myAnalyser)*300;
+          avg[2] = this.audioPreperd.getfinaldataZ(this.myAnalyser) * 23456;
+        }
+        var innerColor =
+          this.colors.innerColor + this.calEle.x * 0x010000 * parseInt(avg[0]);
+        var topColor =
+          this.colors.topColor + this.calEle.y * 0x000100 * parseInt(avg[1]);
+        var botColor =
+          this.colors.bottomColor + this.calEle.z * 0x000001 * parseInt(avg[2]);
+
+        three.light.color.set(innerColor);
+        three.hemisphereLight.color.set(topColor);
+        three.hemisphereLight.groundColor.set(botColor);
+      } else {
+        var innerColor = this.colors.innerColor;
+        var topColor = this.colors.topColor;
+        var botColor = this.colors.bottomColor;
+
+        three.light.color.set(innerColor);
+        three.hemisphereLight.color.set(topColor);
+        three.hemisphereLight.groundColor.set(botColor);
+      }
+      three.renderer.render(three.scene, three.camera);
       requestAnimationFrame(this.render);
     },
     renderWithMusic() {
-      var self = this
+      var self = this;
       var array = new Uint8Array(this.myAnalyser.analyser.frequencyBinCount);
       this.myAnalyser.frequencies(array);
       TweenMax.to(this.three.point, 0.8, {
         // y: (this.audioEnhanced.getAvg(this.myAnalyser) * 10) / this.three.height,
         // x: (this.audioEnhanced.getAvg(this.myAnalyser) * 10) / this.three.width,
-        x: self.audioEnhanced.datatransX(this.myAnalyser,self.three.width),
-        y: self.audioEnhanced.datatransY(this.myAnalyser,self.three.height),
+        x: self.audioEnhanced.datatransX(this.myAnalyser, self.three.width),
+        y: self.audioEnhanced.datatransY(this.myAnalyser, self.three.height),
         ease: Power4.easeOut
       });
       requestAnimationFrame(this.renderWithMusic);
     },
-  changeColor(config){
-    this.colors ={...this.colors,...config.colors}
-    this.calEle = config.calEle
-  },
-  changeSharpNum(percent){
-      this.sharpNum = this.sharpRange * percent 
-      console.log(this.sharpNum)
-  }
+    changeColor(config) {
+      this.colors = { ...this.colors, ...config.colors };
+      this.calEle = config.calEle;
+    },
+    changeSharpNum(percent) {
+      this.sharpNum = this.sharpRange * percent;
+    },
+    modeChangeTrigger(i) {
+      console.log(11111);
+      this.mode = i;
+    }
   },
 
   watch: {
@@ -279,41 +298,41 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-$gap:10px;
-$height:40px;
-$right:30px;
-$base-index:100;
+$gap: 10px;
+$height: 40px;
+$right: 30px;
+$base-index: 100;
 .candy {
   position: relative;
   .color-picker {
     position: absolute;
     right: $right;
     top: $height;
-    z-index:$base-index + 20;
+    z-index: $base-index + 20;
   }
 
-  .spectrogram{
-    position:absolute;
+  .spectrogram {
+    position: absolute;
     left: 0px;
-    top:0;
-    z-index:90;
+    top: 0;
+    z-index: 90;
     // transform: rotateZ(90deg);
   }
 
-  .sharp-slider{
-    position:absolute;
-    top:$height * 2 + $gap;
-    right:$right;
+  .sharp-slider {
+    position: absolute;
+    top: $height * 2 + $gap;
+    right: $right;
     // right:$right;
-    z-index:$base-index +10;
+    z-index: $base-index + 10;
   }
 
-  .mode-picker{
-     position:absolute;
-    top:$height * 3 + $gap * 2;
-    right:$right;
+  .mode-picker {
+    position: absolute;
+    top: $height * 3 + $gap * 2;
+    right: $right;
     // right:$right;
-    z-index:$base-index;
+    z-index: $base-index;
   }
 }
 </style>
