@@ -26,7 +26,7 @@
     "eslint-plugin-vue": "^5.0.0",
     "postcss": "^7.0.17",
     "postcss-pxtorem": "^4.0.1",
-    "vant": "^2.1.7",
+    "vant": "^2.1.8",
     "vue-template-compiler": "^2.6.10"
   },
   "eslintConfig": {
