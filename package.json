@@ -24,7 +24,7 @@
     "better-scroll": "^1.15.2",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
-    "postcss": "^7.0.17",
+    "postcss": "^7.0.36",
     "postcss-pxtorem": "^4.0.1",
     "vant": "^2.1.7",
     "vue-template-compiler": "^2.6.10"
